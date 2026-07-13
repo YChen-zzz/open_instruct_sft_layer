@@ -297,11 +297,6 @@ class FlatArguments:
     )
 
     # Save-once-and-exit controls
-    """
-    Yupeng: 9.17
-    save_state_once_at_step, 在某一step save state一次
-    save_state_then_exit， 在save_state_once_at_step的位置直接break
-    """
     save_state_once_at_step: Optional[int] = field(
         default=None,
         metadata={
@@ -315,14 +310,7 @@ class FlatArguments:
         },
     )
     
-    """
-    Yupeng: 9.16 
-    
-    这里是修改restart 之后模型的optimizer， lr schedualr等参数。
-    
-    
-    """
-    # Resume customization controls
+    # Resume customization controls: override optimizer/LR scheduler state after resuming from a checkpoint.
     reset_lr_scheduler_after_resume: bool = field(
         default=False,
         metadata={
@@ -473,18 +461,11 @@ def main(args: FlatArguments, tc: TokenizerConfig):
     # ------------------------------------------------------------
     # Setup tokenizer
     
-    """
-    Yupeng 8.31:
-    这里tc 的chat_template_name 默认为tulu 会自动调取tulu的chat template，我们可以把的chat_template_name 改成"default"
-    ,那么chat_template 会因为CHAT_TEMPLATES 中没有"default" 而使用默认的tokenizer. chat template.
-    """
+    # Force the default (tokenizer-provided) chat template instead of TokenizerConfig's
+    # tulu default, since CHAT_TEMPLATES has no "default" entry.
     tc.chat_template_name = "default"
     #tc.add_bos = True
     tc.use_fast = True
-    """
-    Yupeng:
-    以上三项是olmo 训练必须加的（虽然我是Olmoe， 难绷）
-    """
     tc.tokenizer_revision = args.model_revision if tc.tokenizer_revision is None else tc.tokenizer_revision
     tc.tokenizer_name_or_path = (
         args.model_name_or_path if tc.tokenizer_name_or_path is None else tc.tokenizer_name_or_path
@@ -911,10 +892,7 @@ def main(args: FlatArguments, tc: TokenizerConfig):
     else:
         resume_batch_idx = 0
         
-    """
-    Yupeng 9.17:
-    若使用了reset_training_process， 就把resume_batch_idx 设置为0
-    """
+    # Reset resume position to the start of training when requested.
     if args.reset_training_process:
         resume_batch_idx = 0
         completed_steps = 0
