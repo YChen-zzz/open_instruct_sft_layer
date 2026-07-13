@@ -1,0 +1,6 @@
+*.parquet
+*.jsonl
+#不保存data 文件夹下的文件
+data/
+local_dataset_cache/
+moe_router_test/

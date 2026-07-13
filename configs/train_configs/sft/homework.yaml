@@ -1,0 +1,3 @@
+dataset_mixer:
+  "data/ifeval_like/ifeval_like_train_dataset.jsonl": 1.0
+  "allenai/tulu-3-sft-personas-instruction-following": 1.0
